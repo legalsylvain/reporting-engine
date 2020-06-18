@@ -118,7 +118,7 @@ class BiSQLViewField(models.Model):
                 sql_field.bi_sql_view_id.view_name, sql_field.name)
 
     # Overload Section
-    @api.multi
+    @api.model
     def create(self, vals):
         field_without_prefix = vals['name'][2:]
         # guess field description
@@ -219,7 +219,7 @@ class BiSQLViewField(models.Model):
         self.ensure_one()
         res = ''
         if self.field_description:
-            res = """<field name="{}"/>""".format(self.name)
+            res = """<field name="{}"/>\n""".format(self.name)
         return res
 
     @api.multi
@@ -227,10 +227,8 @@ class BiSQLViewField(models.Model):
         self.ensure_one()
         res = ''
         if self.field_description and self.is_group_by:
-            res = \
-                """<filter name="%s" string="%s"
-                        context="{'group_by':'%s'}"/>""" % (
-                    self.field_description.lower().replace(' ', '_'),
-                    self.field_description, self.name
-                )
+            res = """<filter name="group_by_%s" string="%s"
+                        context="{'group_by':'%s'}"/>\n""" % (
+                        self.name, self.field_description, self.name
+                    )
         return res
