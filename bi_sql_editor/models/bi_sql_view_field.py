@@ -110,6 +110,19 @@ class BiSQLViewField(models.Model):
                 raise UserError(_(
                     'You can not create indexes on non materialized views'))
 
+    # @api.constrains("graph_type", "is_group_by")
+    # def check_graph_type_is_group_by(self):
+    #     for rec in self.filtered(lambda x: x.graph_type in ["col", "row"]):
+    #         if not rec.is_group_by:
+    #             raise UserError(_(
+    #                 "Field of type 'Column' or 'Row' should be marked as"
+    #                 " 'Is Group by'."))
+
+    # @api.onchange("graph_type")
+    # def _onchange_graph_type(self):
+    #     if self.graph_type in ("col", "row"):
+    #         self.is_group_by = True
+
     # Compute Section
     @api.multi
     def _compute_index_name(self):
@@ -201,7 +214,7 @@ class BiSQLViewField(models.Model):
         self.ensure_one()
         res = ''
         if self.graph_type and self.field_description:
-            res = """<field name="{}" type="{}" />""".format(
+            res = """<field name="{}" type="{}" />\n""".format(
                 self.name, self.graph_type)
         return res
 
@@ -209,9 +222,11 @@ class BiSQLViewField(models.Model):
     def _prepare_pivot_field(self):
         self.ensure_one()
         res = ''
-        if self.graph_type and self.field_description:
-            res = """<field name="{}" type="{}" />""".format(
-                self.name, self.graph_type)
+        if self.field_description:
+            graph_type_text =\
+                self.graph_type and "type=\"%s\"" % (self.graph_type) or ""
+            res = """<field name="{}" {} />\n""".format(
+                self.name, graph_type_text)
         return res
 
     @api.multi
